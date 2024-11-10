@@ -1,7 +1,5 @@
 package com.sans.souci.fpik.chapter3
 
-import java.io.PrintStream
-
 sealed class List<out A> {
     companion object {
         fun <A> of(vararg aa: A): List<A> {
@@ -16,6 +14,45 @@ sealed class List<out A> {
             when {
                 n == 0 -> Nil
                 else -> of(*((0..n).map { a }.toTypedArray()))
+            }
+
+        fun <A> drop(
+            l: List<A>,
+            n: Int,
+        ): List<A> {
+            tailrec fun dropIt(
+                l: List<A>,
+                n: Int,
+            ): List<A> =
+                if (l is Nil || n <= 0) {
+                    l
+                } else {
+                    dropIt(tail(l), n - 1)
+                }
+
+            return dropIt(l, n)
+        }
+
+        fun <A> dropWhile(
+            l: List<A>,
+            f: (A) -> Boolean,
+        ): List<A> {
+            return when (l) {
+                is Nil -> l
+                is Cons -> {
+                    if (f(l.head)) {
+                        Cons(l.head, dropWhile(l.tail, f))
+                    } else {
+                        dropWhile(l.tail, f)
+                    }
+                }
+            }
+        }
+
+        fun <A> tail(xs: List<A>): List<A> =
+            when (xs) {
+                is Nil -> xs
+                is Cons -> xs.tail
             }
 
         fun <A> tailNil(list: List<A>): List<A> =
@@ -36,22 +73,25 @@ sealed class List<out A> {
                 is Cons -> list.head
             }
 
-        tailrec fun <A> print(
-            list: List<A>,
-            printStream: PrintStream,
-        ) {
-            when (list) {
-                is Nil -> {
-                    printStream.println()
-                    return
-                }
-
-                is Cons -> {
-                    printStream.print("${list.head} ")
-                    print(list.tail, printStream)
-                }
+        fun <A> setHead(
+            xs: List<A>,
+            x: A,
+        ): List<A> =
+            when (xs) {
+                is Nil -> of(x)
+                is Cons -> Cons(x, xs.tail)
             }
-        }
+
+        fun <A> init(l: List<A>): List<A> =
+            when (l) {
+                is Nil -> l
+                is Cons ->
+                    if (l.tail is Nil) {
+                        Nil
+                    } else {
+                        Cons(l.head, init(l.tail))
+                    }
+            }
     }
 }
 
