@@ -1,6 +1,6 @@
 package com.sans.souci.fpik.chapter3
 
-import io.kotest.assertions.throwables.shouldThrow
+import io.kotest.assertions.throwables.shouldNotThrow
 import io.kotest.core.spec.style.ExpectSpec
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.should
@@ -9,8 +9,16 @@ import io.kotest.matchers.types.shouldBeInstanceOf
 import io.kotest.matchers.types.shouldBeSameInstanceAs
 
 class SinglyLinkedListSpec : ExpectSpec({
-    expect("Init should sof on a big list") {
-        shouldThrow<StackOverflowError> { List.fill(50_000, 1) }
+    expect("Init should not sof on a big list") {
+        shouldNotThrow<StackOverflowError> { List.fill(50_000, 1) }
+    }
+
+    expect("Init with producer should not sof on a big list") {
+        shouldNotThrow<StackOverflowError> {
+            List.fillProducer(50_000, 1) { it + 1 }.should {
+                println(List.head(it))
+            }
+        }
     }
 
     context("head") {
@@ -130,25 +138,18 @@ class SinglyLinkedListSpec : ExpectSpec({
             List.dropWhile(Nil, { _ -> false }).shouldBeSameInstanceAs(Nil)
         }
 
-        expect("Can drop while on Cons returns same Cons if all are true") {
+        expect("Can drop while on Cons returns Nil if all are true") {
             val cons = List.of(1, 2, 3)
-            List.dropWhile(cons, { _ -> true }) shouldBe cons
+            List.dropWhile(cons, { _ -> true }) shouldBe Nil
         }
 
         val cons = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-        expect("Can drop odds on Cons returns Cons of only evens") {
-            List.dropWhile(cons, { a -> a % 2 == 0 }) shouldBe List.of(2, 4, 6, 8, 10)
+        expect("Can drop cons until a number 5 or greater is encountered") {
+            List.dropWhile(cons, { a -> a < 5 }) shouldBe List.of(5, 6, 7, 8, 9, 10)
         }
 
         expect("Can drop odds on Cons returns Cons of only odds") {
-            List.dropWhile(cons, { a -> a % 2 == 1 }) shouldBe List.of(1, 3, 5, 7, 9)
-        }
-    }
-
-    context("Fill and drop") {
-        val cons = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
-        expect("Can drop odds on Cons returns Cons of only evens") {
-            List.dropWhile(cons, { a -> a % 2 == 0 }) shouldBe List.of(2, 4, 6, 8, 10)
+            List.dropWhile(cons, { a -> a < 10 }) shouldBe List.of(10)
         }
     }
 
