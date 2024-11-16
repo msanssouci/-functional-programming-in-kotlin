@@ -7,14 +7,42 @@ sealed class List<out A> {
             return if (aa.isEmpty()) Nil else Cons(aa[0], of(*tail))
         }
 
-        inline fun <reified A> fill(
+        fun <A> fillProducer(
             n: Int,
             a: A,
-        ): List<A> =
-            when {
-                n == 0 -> Nil
-                else -> of(*((0..n).map { a }.toTypedArray()))
-            }
+            p: (A) -> A = { prevA -> prevA },
+        ): List<A> {
+            tailrec fun fillIt(
+                i: Int,
+                nextA: A,
+                acc: List<A> = Nil,
+            ): List<A> =
+                when {
+                    i <= 0 -> acc
+                    else -> fillIt(i - 1, p(nextA), Cons(nextA, acc))
+                }
+
+            return fillIt(n, a)
+        }
+
+        fun <A> fill(
+            n: Int,
+            a: A,
+        ): List<A> {
+            /**
+             * This only works because order does not matter
+             */
+            tailrec fun fillIt(
+                i: Int,
+                acc: List<A> = Nil,
+            ): List<A> =
+                when {
+                    i <= 0 -> acc
+                    else -> fillIt(i - 1, Cons(a, acc))
+                }
+
+            return fillIt(n)
+        }
 
         fun <A> drop(
             l: List<A>,
@@ -39,13 +67,7 @@ sealed class List<out A> {
         ): List<A> {
             return when (l) {
                 is Nil -> l
-                is Cons -> {
-                    if (f(l.head)) {
-                        Cons(l.head, dropWhile(l.tail, f))
-                    } else {
-                        dropWhile(l.tail, f)
-                    }
-                }
+                is Cons -> if (f(l.head)) dropWhile(l.tail, f) else l
             }
         }
 
