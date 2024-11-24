@@ -1,6 +1,7 @@
 package com.sans.souci.fpik.chapter3
 
 import io.kotest.assertions.throwables.shouldNotThrow
+import io.kotest.assertions.throwables.shouldThrow
 import io.kotest.core.spec.style.ExpectSpec
 import io.kotest.matchers.nulls.shouldBeNull
 import io.kotest.matchers.should
@@ -169,6 +170,40 @@ class SinglyLinkedListSpec : ExpectSpec({
         expect("Init should drop the last element of a list") {
             val cons = List.of(1, 2, 3, 4, 5, 6, 7, 8, 9, 10)
             List.init(cons) shouldBe List.of(1, 2, 3, 4, 5, 6, 7, 8, 9)
+        }
+    }
+
+    context("Sum") {
+        expect("Sum should return 0 for Nil") {
+            List.sum(Nil) shouldBe 0
+        }
+
+        expect("Sum should return 1 for Cons with 1 element") {
+            List.sum(List.of(1)) shouldBe 1
+        }
+
+        expect("Sum should return 15 for Cons with 1 to 5") {
+            List.sum(List.of(1, 2, 3, 4, 5)) shouldBe 15
+        }
+    }
+
+    context("Product") {
+        expect("Product should return 1 for Nil") {
+            List.product(Nil) shouldBe 1
+        }
+
+        expect("Product should return 1 for Cons with 1 element") {
+            List.product(List.of(1.0)) shouldBe 1
+        }
+
+        expect("Product should return 120 for Cons with 1 to 5") {
+            List.product(List.of(1.0, 2.0, 3.0, 4.0, 5.0)) shouldBe 120.0
+        }
+
+        expect("Product should throw IllegalArgumentException for Cons with 1 to 5 containing 0.0") {
+            shouldThrow<IllegalArgumentException> {
+                List.product(List.of(1.0, 2.0, 3.0, 0.0, 4.0, 5.0))
+            }
         }
     }
 })
